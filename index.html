@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belajar Integral</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231e1b4b' width='100' height='100'/><text x='50' y='70' font-size='80' fill='%236366f1' text-anchor='middle' font-weight='bold' font-family='serif'>∫</text></svg>">
+  <link rel="manifest" href="data:application/json,{%22name%22:%22Belajar Integral%22,%22short_name%22:%22Integral%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%231e1b4b%22,%22theme_color%22:%226366f1%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%236366f1' width='192' height='192' rx='45'/><text x='96' y='140' font-size='120' fill='white' text-anchor='middle' font-weight='bold' font-family='serif'>∫</text></svg>%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%22},{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%236366f1' width='192' height='192' rx='45'/><text x='96' y='140' font-size='120' fill='white' text-anchor='middle' font-weight='bold' font-family='serif'>∫</text></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22maskable%22}]}">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+html, body { height: 100%; margin: 0; }
+* { font-family: 'Outfit', sans-serif; box-sizing: border-box; }
+code, .mono { font-family: 'JetBrains Mono', monospace; }
+.app-wrap { height: 100%; width: 100%; overflow-y: auto; overflow-x: hidden; }
+.nav-btn { transition: all 0.25s ease; }
+.nav-btn:hover { transform: translateY(-2px); }
+.nav-btn.active { box-shadow: 0 4px 20px rgba(99,102,241,0.4); }
+.card-enter { animation: cardIn 0.4s ease both; }
+@keyframes cardIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+.step-box { border-left: 3px solid; padding-left: 1rem; margin-bottom: 1rem; animation: cardIn 0.3s ease both; }
+.quiz-opt { transition: all 0.2s ease; cursor: pointer; }
+.quiz-opt:hover { transform: scale(1.02); }
+.quiz-opt.correct { background: #059669 !important; color: #fff !important; border-color: #059669 !important; }
+.quiz-opt.wrong { background: #dc2626 !important; color: #fff !important; border-color: #dc2626 !important; }
+.progress-fill { transition: width 0.5s ease; }
+.hero-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 70%, #6366f1 100%); }
+.card-glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+.tooltip-math { background: #1e1b4b; color: #c7d2fe; padding: 1rem 1.25rem; border-radius: 0.75rem; font-size: 0.95rem; line-height: 1.7; }
+.chapter-card { transition: all 0.3s ease; }
+.chapter-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1e1b4b; }
+::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="app-wrap hero-gradient text-white" id="app"><!-- TOP NAV -->
+   <nav class="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 py-3" style="background:rgba(30,27,75,0.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()"><span class="text-2xl">∫</span> <span class="font-bold text-lg" id="navTitle">Belajar Integral</span>
+    </div>
+    <div class="flex items-center gap-3"><span class="text-xs text-indigo-300 hidden sm:inline" id="progressLabel">0 / 8 Bab</span>
+     <div class="w-24 h-2 rounded-full bg-indigo-900 overflow-hidden hidden sm:block">
+      <div class="h-full rounded-full bg-indigo-400 progress-fill" id="progressBar" style="width:0%"></div>
+     </div>
+    </div>
+   </nav><!-- CONTENT -->
+   <main class="max-w-4xl mx-auto px-4 md:px-8 py-6 pb-24" id="content"></main>
+  </div>
+  <script>
+// ============ DATA ============
+const chapters = [
+  {
+    id: 1,
+    title: "Apa Itu Integral?",
+    icon: "🧠",
+    color: "#818cf8",
+    theory: `<p><b>Integral</b> adalah operasi kebalikan dari turunan (diferensial). Jika turunan mencari laju perubahan, integral mencari <b>akumulasi</b> atau <b>luas di bawah kurva</b>.</p>
+<p class="mt-3">Ada dua jenis integral:</p>
+<ul class="list-disc ml-5 mt-2 space-y-1">
+<li><b>Integral Tak Tentu</b>: mencari fungsi asal (antiturunan), hasilnya mengandung konstanta C</li>
+<li><b>Integral Tentu</b>: menghitung luas daerah di bawah kurva antara dua batas</li>
+</ul>
+<p class="mt-3">Notasi: <span class="mono bg-indigo-900/50 px-2 py-1 rounded">∫ f(x) dx</span></p>`,
+    examples: [
+      {
+        problem: "Jika f'(x) = 2x, berapakah f(x)?",
+        steps: [
+          "Kita tahu turunan dari x² adalah 2x",
+          "Maka antiturunan (integral) dari 2x adalah x²",
+          "Jangan lupa tambahkan konstanta C",
+          "∫ 2x dx = x² + C"
+        ],
+        answer: "x² + C"
+      }
+    ],
+    quiz: [
+      { q: "Jika f'(x) = 2x, berapakah f(x)?", answer: "x² + C", solution: "Antiturunan dari 2x adalah x². Jangan lupa tambahkan konstanta C." },
+      { q: "Apa perbedaan integral tak tentu dan integral tentu?", answer: "Integral tak tentu: hasil dengan konstanta C. Integral tentu: hasil berupa bilangan (luasan).", solution: "Integral tak tentu menghasilkan fungsi + C, sedangkan integral tentu menghitung nilai tertentu antara dua batas." },
+      { q: "Tulis notasi integral dari fungsi f(x) terhadap x", answer: "∫ f(x) dx", solution: "Simbol ∫ adalah lambang integral, f(x) adalah fungsi, dx menyatakan diferensial x." },
+      { q: "Mengapa kita perlu menambahkan konstanta C pada integral tak tentu?", answer: "Karena turunan dari konstanta adalah nol, sehingga ada tak terbatas fungsi yang memiliki turunan yang sama", solution: "Konstanta C mewakili semua fungsi yang mungkin dengan turunan yang sama. Contoh: turunan dari x² + 5 dan x² + 100 keduanya adalah 2x." },
+      { q: "Jika F(x) adalah antiturunan dari f(x), maka F'(x) sama dengan apa?", answer: "f(x)", solution: "Integral dan turunan adalah operasi kebalikan. Jika F adalah antiturunan f, maka turunan F adalah f." }
+    ]
+  },
+  {
+    id: 2,
+    title: "Rumus Dasar Integral",
+    icon: "📐",
+    color: "#a78bfa",
+    theory: `<p>Rumus-rumus dasar yang wajib dihapal:</p>
+<div class="tooltip-math mt-3 space-y-2">
+<p>1. <span class="mono">∫ xⁿ dx = xⁿ⁺¹/(n+1) + C</span> &nbsp; (n ≠ -1)</p>
+<p>2. <span class="mono">∫ k dx = kx + C</span> &nbsp; (k = konstanta)</p>
+<p>3. <span class="mono">∫ k·f(x) dx = k · ∫ f(x) dx</span></p>
+<p>4. <span class="mono">∫ [f(x) ± g(x)] dx = ∫ f(x) dx ± ∫ g(x) dx</span></p>
+</div>
+<p class="mt-3">Rumus nomor 1 disebut <b>Rumus Pangkat (Power Rule)</b> dan merupakan fondasi dari semua integral polinomial.</p>`,
+    examples: [
+      {
+        problem: "Hitung ∫ x³ dx",
+        steps: [
+          "Gunakan rumus: ∫ xⁿ dx = xⁿ⁺¹/(n+1) + C",
+          "Di sini n = 3",
+          "∫ x³ dx = x³⁺¹/(3+1) + C",
+          "= x⁴/4 + C"
+        ],
+        answer: "x⁴/4 + C"
+      },
+      {
+        problem: "Hitung ∫ 5x² dx",
+        steps: [
+          "Keluarkan konstanta: 5 · ∫ x² dx",
+          "Gunakan rumus pangkat: ∫ x² dx = x³/3 + C",
+          "= 5 · x³/3 + C",
+          "= 5x³/3 + C"
+        ],
+        answer: "5x³/3 + C"
+      }
+    ],
+    quiz: [
+      { q: "Hitung ∫ x⁴ dx dan tunjukkan langkah-langkahnya!", answer: "x⁵/5 + C", solution: "Gunakan rumus pangkat dengan n=4: x⁵/5 + C" },
+      { q: "Hitung ∫ 7 dx", answer: "7x + C", solution: "Konstanta k terintegrasi menjadi kx + C, sehingga 7x + C" },
+      { q: "Hitung ∫ 3x dx dengan menunjukkan rumus yang digunakan", answer: "3x²/2 + C", solution: "Keluarkan konstanta 3, lalu gunakan rumus pangkat: 3 · x²/2 + C" },
+      { q: "Hitung ∫ x⁻³ dx", answer: "−1/(2x²) + C atau −(1/2)x⁻² + C", solution: "Gunakan rumus pangkat: x⁻³⁺¹/(-3+1) = x⁻²/(-2) = −(1/2)x⁻² + C" },
+      { q: "Jika ∫ xⁿ dx = x⁶/6 + C, berapakah nilai n?", answer: "n = 5", solution: "Dari rumus xⁿ⁺¹/(n+1), jika hasilnya x⁶/6, maka n+1 = 6, sehingga n = 5" },
+      { q: "Hitung ∫ 2x³ dx", answer: "x⁴/2 + C", solution: "Keluarkan 2: 2 ∫ x³ dx = 2 · x⁴/4 = x⁴/2 + C" }
+    ]
+  },
+  {
+    id: 3,
+    title: "Integral Fungsi Aljabar",
+    icon: "🔢",
+    color: "#c084fc",
+    theory: `<p>Kita dapat mengintegralkan polinomial dengan mengintegralkan setiap suku secara terpisah.</p>
+<div class="tooltip-math mt-3">
+<p><span class="mono">∫ (aₙxⁿ + … + a₁x + a₀) dx</span></p>
+<p class="mt-1">= aₙ·xⁿ⁺¹/(n+1) + … + a₁·x²/2 + a₀·x + C</p>
+</div>
+<p class="mt-3">Tips: Jika bertemu pecahan atau akar, ubah dulu ke bentuk pangkat.</p>
+<div class="tooltip-math mt-2 space-y-1">
+<p><span class="mono">1/x² = x⁻²</span></p>
+<p><span class="mono">√x = x^(1/2)</span></p>
+<p><span class="mono">∛x = x^(1/3)</span></p>
+</div>`,
+    examples: [
+      {
+        problem: "Hitung ∫ (3x² + 2x − 5) dx",
+        steps: [
+          "Integralkan tiap suku satu per satu:",
+          "∫ 3x² dx = 3 · x³/3 = x³",
+          "∫ 2x dx = 2 · x²/2 = x²",
+          "∫ −5 dx = −5x",
+          "Gabungkan: x³ + x² − 5x + C"
+        ],
+        answer: "x³ + x² − 5x + C"
+      },
+      {
+        problem: "Hitung ∫ √x dx",
+        steps: [
+          "Ubah √x menjadi x^(1/2)",
+          "Gunakan rumus pangkat: n = 1/2",
+          "∫ x^(1/2) dx = x^(3/2) / (3/2) + C",
+          "= (2/3)x^(3/2) + C",
+          "= (2/3)x√x + C"
+        ],
+        answer: "(2/3)x√x + C"
+      }
+    ],
+    quiz: [
+      { q: "Hitung ∫ (x² + 4x) dx secara lengkap", answer: "x³/3 + 2x² + C", solution: "∫ x² dx = x³/3, ∫ 4x dx = 2x². Hasil: x³/3 + 2x² + C" },
+      { q: "Hitung ∫ x⁻² dx dan jelaskan hasilnya", answer: "−x⁻¹ + C atau −1/x + C", solution: "Gunakan rumus pangkat: x⁻²⁺¹/(-2+1) = −x⁻¹ + C" },
+      { q: "Hitung ∫ (6x² − 3) dx", answer: "2x³ − 3x + C", solution: "∫ 6x² dx = 2x³, ∫ −3 dx = −3x. Hasil: 2x³ − 3x + C" },
+      { q: "Hitung ∫ (5x⁴ + 2x² − 1) dx", answer: "x⁵ + (2/3)x³ − x + C", solution: "Integral setiap suku: 5·x⁵/5 = x⁵, 2·x³/3 = (2/3)x³, −x" },
+      { q: "Hitung ∫ (1/x) dx. Apa kesulitannya?", answer: "Tidak bisa menggunakan rumus pangkat karena n = −1 (pengecualian)", solution: "∫ x⁻¹ dx = ln|x| + C (bukan dari rumus pangkat biasa, ini kasus khusus)" },
+      { q: "Hitung ∫ √x dx", answer: "(2/3)x^(3/2) + C atau (2/3)x√x + C", solution: "√x = x^(1/2). Gunakan pangkat: x^(3/2)/(3/2) = (2/3)x^(3/2)" }
+    ]
+  },
+  {
+    id: 4,
+    title: "Integral Fungsi Trigonometri",
+    icon: "📏",
+    color: "#f472b6",
+    theory: `<p>Rumus integral fungsi trigonometri dasar:</p>
+<div class="tooltip-math mt-3 space-y-2">
+<p><span class="mono">∫ sin x dx = −cos x + C</span></p>
+<p><span class="mono">∫ cos x dx = sin x + C</span></p>
+<p><span class="mono">∫ sec²x dx = tan x + C</span></p>
+<p><span class="mono">∫ csc²x dx = −cot x + C</span></p>
+<p><span class="mono">∫ sec x · tan x dx = sec x + C</span></p>
+<p><span class="mono">∫ csc x · cot x dx = −csc x + C</span></p>
+</div>`,
+    examples: [
+      {
+        problem: "Hitung ∫ (2sin x + 3cos x) dx",
+        steps: [
+          "Integralkan tiap suku:",
+          "∫ 2sin x dx = 2(−cos x) = −2cos x",
+          "∫ 3cos x dx = 3(sin x) = 3sin x",
+          "Gabungkan: −2cos x + 3sin x + C"
+        ],
+        answer: "−2cos x + 3sin x + C"
+      }
+    ],
+    quiz: [
+      { q: "Hitung ∫ cos x dx", answer: "sin x + C", solution: "Integral dari cos x adalah sin x + C" },
+      { q: "Hitung ∫ (sin x + cos x) dx", answer: "−cos x + sin x + C", solution: "∫ sin x dx = −cos x, ∫ cos x dx = sin x" },
+      { q: "Hitung ∫ sec²x dx", answer: "tan x + C", solution: "Integral dari sec²x adalah tan x + C (rumus dasar)" },
+      { q: "Hitung ∫ 2cos x dx", answer: "2sin x + C", solution: "Keluarkan 2: 2 ∫ cos x dx = 2 sin x + C" },
+      { q: "Hitung ∫ (3sin x − 2cos x) dx", answer: "−3cos x − 2sin x + C", solution: "∫ 3sin x dx = −3cos x, ∫ −2cos x dx = −2sin x" },
+      { q: "Hitung ∫ csc²x dx", answer: "−cot x + C", solution: "Integral dari csc²x adalah −cot x + C" }
+    ]
+  },
+  {
+    id: 5,
+    title: "Integral Substitusi",
+    icon: "🔄",
+    color: "#fb923c",
+    theory: `<p><b>Metode substitusi (u-substitution)</b> digunakan ketika integran berbentuk komposisi fungsi.</p>
+<div class="tooltip-math mt-3">
+<p>Langkah-langkah:</p>
+<ol class="list-decimal ml-5 space-y-1 mt-2">
+<li>Pilih <b>u = g(x)</b> (bagian dalam)</li>
+<li>Hitung <b>du = g'(x) dx</b></li>
+<li>Ganti semua x dan dx dengan u dan du</li>
+<li>Integralkan dalam u</li>
+<li>Substitusi balik u → x</li>
+</ol>
+</div>`,
+    examples: [
+      {
+        problem: "Hitung ∫ 2x(x²+1)³ dx",
+        steps: [
+          "Misalkan u = x² + 1",
+          "Maka du = 2x dx ✓ (sudah ada di soal!)",
+          "Integral menjadi: ∫ u³ du",
+          "= u⁴/4 + C",
+          "Substitusi balik: = (x²+1)⁴/4 + C"
+        ],
+        answer: "(x²+1)⁴/4 + C"
+      },
+      {
+        problem: "Hitung ∫ cos(3x) dx",
+        steps: [
+          "Misalkan u = 3x → du = 3dx → dx = du/3",
+          "∫ cos(u) · du/3",
+          "= (1/3) ∫ cos u du",
+          "= (1/3) sin u + C",
+          "= (1/3) sin(3x) + C"
+        ],
+        answer: "(1/3)sin(3x) + C"
+      }
+    ],
+    quiz: [
+      { q: "Untuk ∫ 2x·eˣ² dx, substitusi apa yang tepat? Jelaskan!", answer: "u = x², du = 2x dx", solution: "Pilih u sebagai bagian dalam eksponensial. Sehingga du = 2x dx yang sudah ada di soal." },
+      { q: "Hitung ∫ sin(5x) dx dengan metode substitusi", answer: "−(1/5)cos(5x) + C", solution: "Misalkan u = 5x, maka du = 5dx. Hasilnya (1/5) · (−cos u) + C = −(1/5)cos(5x) + C" },
+      { q: "Jika u = x²+3, berapakah du?", answer: "du = 2x dx", solution: "Turunkan u terhadap x: du = 2x dx" },
+      { q: "Hitung ∫ e^(2x) dx menggunakan substitusi", answer: "(1/2)e^(2x) + C", solution: "Misalkan u = 2x, du = 2dx. ∫ e^u · (du/2) = (1/2)e^u + C = (1/2)e^(2x) + C" },
+      { q: "Hitung ∫ 3x²(x³+1)² dx", answer: "(x³+1)³/3 + C", solution: "Misalkan u = x³+1, du = 3x² dx. ∫ u² du = u³/3 + C = (x³+1)³/3 + C" },
+      { q: "Hitung ∫ x√(x²+1) dx", answer: "(1/3)(x²+1)^(3/2) + C", solution: "Misalkan u = x²+1, du = 2x dx. ∫ √u · (du/2) = (1/3)u^(3/2) + C" }
+    ]
+  },
+  {
+    id: 6,
+    title: "Integral Parsial",
+    icon: "✂️",
+    color: "#34d399",
+    theory: `<p><b>Integral parsial</b> digunakan untuk mengintegralkan perkalian dua fungsi.</p>
+<div class="tooltip-math mt-3">
+<p>Rumus: <span class="mono">∫ u dv = uv − ∫ v du</span></p>
+</div>
+<p class="mt-3">Panduan memilih u (metode <b>LIATE</b>):</p>
+<ul class="list-disc ml-5 mt-2 space-y-1">
+<li><b>L</b> — Logaritma (ln x)</li>
+<li><b>I</b> — Invers trigonometri</li>
+<li><b>A</b> — Aljabar (xⁿ)</li>
+<li><b>T</b> — Trigonometri (sin, cos)</li>
+<li><b>E</b> — Eksponensial (eˣ)</li>
+</ul>
+<p class="mt-2">Pilih u dari urutan paling atas LIATE, sisanya jadi dv.</p>`,
+    examples: [
+      {
+        problem: "Hitung ∫ x·cos x dx",
+        steps: [
+          "Pilih: u = x → du = dx",
+          "dv = cos x dx → v = sin x",
+          "Rumus: ∫ u dv = uv − ∫ v du",
+          "= x·sin x − ∫ sin x dx",
+          "= x·sin x − (−cos x) + C",
+          "= x·sin x + cos x + C"
+        ],
+        answer: "x·sin x + cos x + C"
+      }
+    ],
+    quiz: [
+      { q: "Tulis rumus integral parsial lengkap", answer: "∫ u dv = uv − ∫ v du", solution: "Rumus dasar integral parsial untuk perkalian dua fungsi." },
+      { q: "Untuk ∫ x·eˣ dx, apa pilihan u menurut LIATE?", answer: "u = x", solution: "Menurut LIATE, Aljabar (x) dipilih sebelum Eksponensial (eˣ)." },
+      { q: "Untuk ∫ ln x dx, apa pilihan u?", answer: "u = ln x", solution: "Logaritma (ln x) adalah prioritas pertama dalam LIATE." },
+      { q: "Hitung ∫ x·sin x dx", answer: "−x·cos x + sin x + C", solution: "u = x, dv = sin x dx. uv − ∫ v du = x(−cos x) − ∫(−cos x) dx = −x·cos x + sin x + C" },
+      { q: "Untuk ∫ x²·eˣ dx, urutkan LIATE yang mungkin digunakan", answer: "A (x²), E (eˣ) - pilih u = x²", solution: "Aljabar lebih tinggi dari Eksponensial dalam urutan LIATE, jadi u = x²" },
+      { q: "Hitung ∫ x·cos x dx", answer: "x·sin x + cos x + C", solution: "u = x, dv = cos x dx. uv − ∫ v du = x(sin x) − ∫ sin x dx = x·sin x + cos x + C" }
+    ]
+  },
+  {
+    id: 7,
+    title: "Integral Tentu",
+    icon: "📊",
+    color: "#38bdf8",
+    theory: `<p><b>Integral tentu</b> menghitung luas daerah di bawah kurva dari batas bawah <b>a</b> ke batas atas <b>b</b>.</p>
+<div class="tooltip-math mt-3">
+<p>Rumus (Teorema Fundamental Kalkulus):</p>
+<p class="mt-1 mono">∫ₐᵇ f(x) dx = F(b) − F(a)</p>
+<p class="mt-1">di mana F(x) adalah antiturunan dari f(x)</p>
+</div>
+<p class="mt-3">Langkah:</p>
+<ol class="list-decimal ml-5 mt-2 space-y-1">
+<li>Cari antiturunan F(x)</li>
+<li>Hitung F(b) − F(a)</li>
+</ol>`,
+    examples: [
+      {
+        problem: "Hitung ∫₁³ 2x dx",
+        steps: [
+          "Antiturunan dari 2x adalah x²",
+          "F(x) = x²",
+          "F(3) = 3² = 9",
+          "F(1) = 1² = 1",
+          "∫₁³ 2x dx = 9 − 1 = 8"
+        ],
+        answer: "8"
+      },
+      {
+        problem: "Hitung ∫₀² (3x² + 1) dx",
+        steps: [
+          "Antiturunan: F(x) = x³ + x",
+          "F(2) = 2³ + 2 = 8 + 2 = 10",
+          "F(0) = 0³ + 0 = 0",
+          "∫₀² (3x² + 1) dx = 10 − 0 = 10"
+        ],
+        answer: "10"
+      }
+    ],
+    quiz: [
+      { q: "Hitung ∫₀¹ 3x² dx", answer: "1", solution: "F(x) = x³. F(1) = 1, F(0) = 0. Hasilnya 1 − 0 = 1" },
+      { q: "Hitung ∫₁² 2x dx dan tunjukkan langkahnya", answer: "3", solution: "F(x) = x². F(2) = 4, F(1) = 1. Hasilnya 4 − 1 = 3" },
+      { q: "Pada integral tentu, mengapa konstanta C tidak perlu ditulis?", answer: "Karena akan saling menghapus saat mengurangi F(b) − F(a)", solution: "Konstanta C di F(b) dan F(a) sama, jadi saat dikurangkan akan hilang." },
+      { q: "Hitung ∫₀² (3x² + 1) dx", answer: "10", solution: "F(x) = x³ + x. F(2) = 10, F(0) = 0. Hasilnya 10 − 0 = 10" },
+      { q: "Hitung ∫₁³ 4x dx", answer: "16", solution: "F(x) = 2x². F(3) = 18, F(1) = 2. Hasilnya 18 − 2 = 16" },
+      { q: "Tuliskan notasi lengkap untuk integral tentu dari f(x) pada interval [a, b]", answer: "∫ₐᵇ f(x) dx", solution: "Notasi integral tentu menunjukkan batas bawah (a) di bawah dan batas atas (b) di atas simbol integral" }
+    ]
+  },
+  {
+    id: 8,
+    title: "Aplikasi Integral",
+    icon: "🚀",
+    color: "#facc15",
+    theory: `<p>Integral memiliki banyak aplikasi penting:</p>
+<div class="mt-3 space-y-3">
+<div class="tooltip-math">
+<p><b>1. Luas Daerah</b></p>
+<p class="mono mt-1">L = ∫ₐᵇ |f(x) − g(x)| dx</p>
+<p class="mt-1 text-sm">Luas daerah antara dua kurva f(x) dan g(x)</p>
+</div>
+<div class="tooltip-math">
+<p><b>2. Volume Benda Putar</b></p>
+<p class="mono mt-1">V = π ∫ₐᵇ [f(x)]² dx</p>
+<p class="mt-1 text-sm">(Metode cakram — putar terhadap sumbu x)</p>
+</div>
+<div class="tooltip-math">
+<p><b>3. Jarak Tempuh</b></p>
+<p class="mono mt-1">s = ∫ₜ₁ᵗ² v(t) dt</p>
+<p class="mt-1 text-sm">Integral kecepatan menghasilkan jarak</p>
+</div>
+</div>`,
+    examples: [
+      {
+        problem: "Hitung luas daerah di bawah y = x² dari x = 0 sampai x = 3",
+        steps: [
+          "Luas = ∫₀³ x² dx",
+          "Antiturunan: F(x) = x³/3",
+          "F(3) = 27/3 = 9",
+          "F(0) = 0",
+          "Luas = 9 − 0 = 9 satuan luas"
+        ],
+        answer: "9 satuan luas"
+      }
+    ],
+    quiz: [
+      { q: "Rumus volume benda putar (metode cakram) adalah?", answer: "V = π ∫ₐᵇ [f(x)]² dx", solution: "Metode cakram menggunakan rumus V = π ∫ [f(x)]² dx untuk rotasi terhadap sumbu x." },
+      { q: "Jika v(t) adalah kecepatan, integral ∫ v(t) dt menghasilkan apa?", answer: "Jarak tempuh", solution: "Integral kecepatan terhadap waktu menghasilkan jarak (displacement)." },
+      { q: "Hitung luas di bawah kurva y = 2x dari x=0 ke x=4", answer: "16", solution: "∫₀⁴ 2x dx = [x²]₀⁴ = 16 − 0 = 16 satuan luas" },
+      { q: "Bagaimana cara menghitung luas daerah antara dua kurva?", answer: "L = ∫ₐᵇ |f(x) − g(x)| dx", solution: "Luas antara dua kurva dihitung dengan mengintegralkan selisih mutlak fungsi pada interval tertentu." },
+      { q: "Hitung luas daerah di bawah y = x² dari x = 0 sampai x = 3", answer: "9", solution: "∫₀³ x² dx = [x³/3]₀³ = 27/3 = 9 satuan luas" },
+      { q: "Apa perbedaan antara displacement dan distance dalam konteks integral kecepatan?", answer: "Displacement: nilai integral ∫ v(t) dt. Distance: integral dari |v(t)| dt", solution: "Displacement bisa negatif (arah), sedangkan distance selalu positif (jarak total yang ditempuh)." }
+    ]
+  }
+];
+
+// ============ STATE ============
+let currentView = 'home';
+let currentChapter = null;
+let currentTab = 'materi';
+let quizState = { answers: {}, submitted: false };
+let completedChapters = new Set();
+
+// ============ CONFIG ============
+const defaultConfig = {
+  app_title: "Belajar Integral"
+};
+
+function applyConfig(cfg) {
+  const el = (id) => document.getElementById(id);
+  const t = el('navTitle');
+  if (t) t.textContent = cfg.app_title || defaultConfig.app_title;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  applyConfig(defaultConfig);
+});
+
+// ============ RENDER ============
+const content = document.getElementById('content');
+
+function updateProgress() {
+  const pct = (completedChapters.size / chapters.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${completedChapters.size} / ${chapters.length} Bab`;
+}
+
+function goHome() { currentView='home'; currentChapter=null; renderHome(); }
+
+function renderHome() {
+  currentView = 'home';
+  const title = defaultConfig.app_title;
+  content.innerHTML = `
+    <div class="text-center py-8 card-enter">
+      <div class="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-lg">
+        <div class="text-5xl">∫</div>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-2" id="homeTitle">${title}</h1>
+      <p class="text-indigo-300 text-lg max-w-lg mx-auto">Pelajari integral dari nol hingga mahir. Materi lengkap, contoh soal bertahap, dan latihan interaktif.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+      ${chapters.map((ch, i) => `
+        <div class="chapter-card card-glass rounded-xl p-5 cursor-pointer card-enter" style="animation-delay:${i*60}ms;border-left:4px solid ${ch.color}" onclick="openChapter(${ch.id})">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">${ch.icon}</span>
+              <div>
+                <div class="text-xs text-indigo-400 font-medium">BAB ${ch.id}</div>
+                <div class="font-semibold text-lg">${ch.title}</div>
+              </div>
+            </div>
+            ${completedChapters.has(ch.id) ? '<span class="text-emerald-400 text-xl">✓</span>' : '<span class="text-indigo-500"><i data-lucide="chevron-right" style="width:20px;height:20px"></i></span>'}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    ${completedChapters.size === chapters.length ? `
+    <div class="mt-8 text-center card-enter card-glass rounded-xl p-6">
+      <div class="text-4xl mb-2">🎉</div>
+      <div class="text-xl font-bold text-emerald-400">Selamat! Semua bab telah selesai!</div>
+      <p class="text-indigo-300 mt-1">Kamu sudah menguasai dasar-dasar integral.</p>
+    </div>` : ''}
+  `;
+  lucide.createIcons();
+}
+
+function openChapter(id) {
+  currentChapter = chapters.find(c => c.id === id);
+  currentTab = 'materi';
+  quizState = { answers: {}, submitted: false };
+  currentView = 'chapter';
+  renderChapter();
+}
+
+function renderChapter() {
+  const ch = currentChapter;
+  content.innerHTML = `
+    <button onclick="goHome()" class="flex items-center gap-1 text-indigo-300 hover:text-white mb-4 nav-btn text-sm"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Kembali</button>
+    <div class="card-enter">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="text-3xl">${ch.icon}</span>
+        <div>
+          <div class="text-xs text-indigo-400 font-medium">BAB ${ch.id}</div>
+          <h2 class="text-2xl font-bold">${ch.title}</h2>
+        </div>
+      </div>
+      <!-- Tabs -->
+      <div class="flex gap-2 mt-5 mb-6">
+        ${['materi','contoh','latihan'].map(t => `
+          <button onclick="switchTab('${t}')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium ${currentTab===t ? 'bg-indigo-600 active text-white' : 'card-glass text-indigo-300 hover:text-white'}">${t==='materi'?'📖 Materi':t==='contoh'?'✏️ Contoh':'🎯 Latihan'}</button>
+        `).join('')}
+      </div>
+      <div id="tabContent"></div>
+    </div>
+  `;
+  lucide.createIcons();
+  renderTab();
+}
+
+function switchTab(t) { currentTab = t; renderTab(); }
+
+function renderTab() {
+  const tc = document.getElementById('tabContent');
+  if (!tc) return;
+  const ch = currentChapter;
+  if (currentTab === 'materi') {
+    tc.innerHTML = `<div class="card-glass rounded-xl p-5 md:p-7 card-enter leading-relaxed text-indigo-100">${ch.theory}</div>
+    <div class="mt-4 text-right"><button onclick="switchTab('contoh')" class="nav-btn bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg text-sm font-medium">Lihat Contoh →</button></div>`;
+  } else if (currentTab === 'contoh') {
+    tc.innerHTML = `<div class="space-y-6">${ch.examples.map((ex, i) => `
+      <div class="card-glass rounded-xl p-5 md:p-7 card-enter" style="animation-delay:${i*100}ms">
+        <div class="font-semibold text-lg mb-3" style="color:${ch.color}">Contoh ${i+1}</div>
+        <div class="bg-indigo-900/40 rounded-lg p-3 mb-4 mono text-sm">${ex.problem}</div>
+        <div class="font-medium text-indigo-300 mb-2 text-sm">Langkah Penyelesaian:</div>
+        ${ex.steps.map((s, j) => `<div class="step-box text-indigo-100 text-sm" style="border-color:${ch.color};animation-delay:${j*80}ms"><span class="text-indigo-400 font-medium">Langkah ${j+1}:</span> ${s}</div>`).join('')}
+        <div class="mt-3 bg-emerald-900/30 border border-emerald-700/30 rounded-lg p-3">
+          <span class="text-emerald-400 font-semibold">Jawaban:</span> <span class="mono">${ex.answer}</span>
+        </div>
+      </div>
+    `).join('')}</div>
+    <div class="mt-4 text-right"><button onclick="switchTab('latihan')" class="nav-btn bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg text-sm font-medium">Mulai Latihan →</button></div>`;
+  } else {
+    renderQuiz(tc, ch);
+  }
+}
+
+function renderQuiz(tc, ch) {
+  const qs = ch.quiz;
+  let html = `<div class="space-y-6">`;
+  
+  qs.forEach((q, i) => {
+    const answered = quizState.answers[i] !== undefined;
+    const isCorrect = answered && quizState.answers[i].toLowerCase().trim() === q.answer.toLowerCase().trim();
+    
+    html += `
+      <div class="card-glass rounded-xl p-5 card-enter" style="animation-delay:${i*80}ms" id="q${i}">
+        <div class="font-semibold mb-4"><span class="text-indigo-400">${i+1}.</span> ${q.q}</div>
+        <div class="space-y-3">
+          <textarea 
+            id="ans${i}" 
+            class="w-full p-3 rounded-lg bg-indigo-950/50 border border-indigo-700/50 text-indigo-100 text-sm" 
+            placeholder="Ketik jawaban kamu di sini..." 
+            rows="3"
+            ${quizState.submitted ? 'disabled' : ''}
+            onchange="updateAnswer(${i}, this.value)"
+          >${quizState.answers[i] || ''}</textarea>
+        </div>
+        ${!quizState.submitted ? `
+          <div class="mt-3">
+            <button onclick="toggleHint(${i})" class="text-indigo-400 hover:text-indigo-300 text-sm flex items-center gap-1 nav-btn">
+              <i data-lucide="eye" style="width:14px;height:14px"></i> <span id="hintToggle${i}">Lihat Jawaban</span>
+            </button>
+            <div id="hint${i}" class="mt-2 bg-indigo-900/30 border border-indigo-700/30 rounded-lg p-3 hidden">
+              <div class="text-indigo-300 text-xs font-semibold mb-1">JAWABAN:</div>
+              <div class="mono text-indigo-100">${q.answer}</div>
+              <div class="text-xs mt-2 text-indigo-400"><b>Penjelasan:</b> ${q.solution}</div>
+            </div>
+          </div>
+        ` : `
+          <div class="mt-3 ${isCorrect ? 'bg-emerald-900/30 border border-emerald-700/30' : 'bg-red-900/30 border border-red-700/30'} rounded-lg p-3">
+            <div class="font-semibold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">
+              ${isCorrect ? '✓ Benar!' : '✗ Belum tepat'}
+            </div>
+            <div class="text-sm mt-1 ${isCorrect ? 'text-emerald-300' : 'text-red-300'}">
+              <b>Jawaban yang diharapkan:</b> ${q.answer}
+            </div>
+            <div class="text-sm mt-2 text-indigo-300">
+              <b>Penjelasan:</b> ${q.solution}
+            </div>
+          </div>
+        `}
+      </div>
+    `;
+  });
+  
+  html += `</div>
+    <div class="mt-5 flex items-center justify-between">
+      ${!quizState.submitted ? `<button onclick="submitQuiz()" class="nav-btn bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-lg font-semibold" id="submitBtn">Periksa Jawaban</button>` :
+      `<div class="flex items-center gap-4">
+        <div class="text-lg font-bold">Skor: <span class="${getScore(ch) === qs.length ? 'text-emerald-400' : 'text-amber-400'}">${getScore(ch)}/${qs.length}</span></div>
+        <button onclick="retryQuiz()" class="nav-btn card-glass px-4 py-2 rounded-lg text-sm">Ulangi</button>
+        ${currentChapter.id < chapters.length ? `<button onclick="openChapter(${currentChapter.id+1})" class="nav-btn bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm">Bab Berikutnya →</button>` : ''}
+      </div>`}
+      <span></span>
+    </div>
+  `;
+  
+  tc.innerHTML = html;
+  lucide.createIcons();
+}
+
+function toggleHint(i) {
+  const hintDiv = document.getElementById(`hint${i}`);
+  const toggle = document.getElementById(`hintToggle${i}`);
+  if (hintDiv.classList.contains('hidden')) {
+    hintDiv.classList.remove('hidden');
+    toggle.textContent = 'Sembunyikan Jawaban';
+  } else {
+    hintDiv.classList.add('hidden');
+    toggle.textContent = 'Lihat Jawaban';
+  }
+}
+
+function updateAnswer(qi, val) {
+  quizState.answers[qi] = val;
+}
+
+function getScore(ch) {
+  return ch.quiz.reduce((s, q, i) => {
+    const userAnswer = (quizState.answers[i] || '').toLowerCase().trim();
+    const correctAnswer = q.answer.toLowerCase().trim();
+    return s + (userAnswer === correctAnswer ? 1 : 0);
+  }, 0);
+}
+
+function submitQuiz() {
+  const ch = currentChapter;
+  const answered = Object.keys(quizState.answers).length;
+  if (answered < ch.quiz.length) {
+    const tc = document.getElementById('tabContent');
+    const existing = document.getElementById('quizWarning');
+    if (!existing) {
+      const warn = document.createElement('div');
+      warn.id = 'quizWarning';
+      warn.className = 'mt-3 text-amber-400 text-sm card-enter';
+      warn.textContent = `Jawab semua ${ch.quiz.length} soal terlebih dahulu!`;
+      tc.appendChild(warn);
+    }
+    return;
+  }
+  quizState.submitted = true;
+  if (getScore(ch) === ch.quiz.length) completedChapters.add(ch.id);
+  updateProgress();
+  renderTab();
+}
+
+function retryQuiz() {
+  quizState = { answers: {}, submitted: false };
+  renderTab();
+}
+
+// ============ INIT ============
+renderHome();
+updateProgress();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f113cce87b55f3c',t:'MTc3Njk5MzEyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
